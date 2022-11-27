@@ -1,13 +1,16 @@
 
 from adafruit_seesaw.seesaw import Seesaw
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTShadowClient
-from board import SCL, SDA
+# from board import SCL, SDA
 
 import logging
 import time
 import json
 import argparse
 import busio
+import board
+import adafruit_dht
+import RPi
 
 # Shadow JSON schema:
 #
@@ -81,63 +84,65 @@ def configureLogging():
     streamHandler.setFormatter(formatter)
     logger.addHandler(streamHandler)
 
+if __name__ == "__main__":
 
-# Parse command line arguments
-args = parseArgs()
+    # Parse command line arguments
+    args = parseArgs()
 
-if not args.certificatePath or not args.privateKeyPath:
-    parser.error("Missing credentials for authentication.")
-    exit(2)
+    if not args.certificatePath or not args.privateKeyPath:
+        parser.error("Missing credentials for authentication.")
+        exit(2)
 
-# If no --port argument is passed, default to 8883
-if not args.port: 
-    args.port = 8883
+    # If no --port argument is passed, default to 8883
+    if not args.port: 
+        args.port = 8883
 
 
-# Init AWSIoTMQTTShadowClient
-myAWSIoTMQTTShadowClient = None
-myAWSIoTMQTTShadowClient = AWSIoTMQTTShadowClient(args.clientId)
-myAWSIoTMQTTShadowClient.configureEndpoint(args.host, args.port)
-myAWSIoTMQTTShadowClient.configureCredentials(args.rootCAPath, args.privateKeyPath, args.certificatePath)
+    # Init AWSIoTMQTTShadowClient
+    myAWSIoTMQTTShadowClient = None
+    myAWSIoTMQTTShadowClient = AWSIoTMQTTShadowClient(args.clientId)
+    myAWSIoTMQTTShadowClient.configureEndpoint(args.host, args.port)
+    myAWSIoTMQTTShadowClient.configureCredentials(args.rootCAPath, args.privateKeyPath, args.certificatePath)
 
-# AWSIoTMQTTShadowClient connection configuration
-myAWSIoTMQTTShadowClient.configureAutoReconnectBackoffTime(1, 32, 20)
-myAWSIoTMQTTShadowClient.configureConnectDisconnectTimeout(10) # 10 sec
-myAWSIoTMQTTShadowClient.configureMQTTOperationTimeout(5) # 5 sec
+    # AWSIoTMQTTShadowClient connection configuration
+    myAWSIoTMQTTShadowClient.configureAutoReconnectBackoffTime(1, 32, 20)
+    myAWSIoTMQTTShadowClient.configureConnectDisconnectTimeout(10) # 10 sec
+    myAWSIoTMQTTShadowClient.configureMQTTOperationTimeout(5) # 5 sec
 
-# Initialize Raspberry Pi's I2C interface
-# i2c_bus = busio.I2C(SCL, SDA)
+    dht22_1 = adafruit_dht.DHT22(board.D4)
 
-# Intialize SeeSaw, Adafruit's Circuit Python library
-# ss = Seesaw(i2c_bus, addr=0x36)
+    temperature_c = dht22_1.temperature
+    temperature_f = temperature_c * (9 / 5) + 32
+    humidity = dht22_1.humidity
+    print(temperature_f, humidity)
 
-# Connect to AWS IoT
-myAWSIoTMQTTShadowClient.connect()
+    # Connect to AWS IoT
+    myAWSIoTMQTTShadowClient.connect()
 
-# Create a device shadow handler, use this to update and delete shadow document
-deviceShadowHandler = myAWSIoTMQTTShadowClient.createShadowHandlerWithName(args.thingName, True)
+    # Create a device shadow handler, use this to update and delete shadow document
+    deviceShadowHandler = myAWSIoTMQTTShadowClient.createShadowHandlerWithName(args.thingName, True)
 
-# Delete current shadow JSON doc
-deviceShadowHandler.shadowDelete(customShadowCallback_Delete, 5)
+    # Delete current shadow JSON doc
+    deviceShadowHandler.shadowDelete(customShadowCallback_Delete, 5)
 
-# Read data from moisture sensor and update shadow
-while True:
+    # Read data from moisture sensor and update shadow
+    while True:
 
-    # read moisture level through capacitive touch pad
-    # moistureLevel = ss.moisture_read()
-    moistureLevel = 10
+        # read moisture level through capacitive touch pad
+        # moistureLevel = ss.moisture_read()
+        moistureLevel = 10
 
-    # read temperature from the temperature sensor
-    # temp = ss.get_temp()
-    temp = 123
+        # read temperature from the temperature sensor
+        # temp = ss.get_temp()
+        temp = 123
 
-    # Display moisture and temp readings
-    print("Moisture Level: {}".format(moistureLevel))
-    print("Temperature: {}".format(temp))
-    
-    # Create message payload
-    payload = {"state":{"reported":{"moisture":str(moistureLevel),"temp":str(temp)}}}
+        # Display moisture and temp readings
+        print("Moisture Level: {}".format(moistureLevel))
+        print("Temperature: {}".format(temp))
+        
+        # Create message payload
+        payload = {"state":{"reported":{"moisture":str(moistureLevel),"temp":str(temp)}}}
 
-    # Update shadow
-    deviceShadowHandler.shadowUpdate(json.dumps(payload), customShadowCallback_Update, 5)
-    time.sleep(1)
+        # Update shadow
+        deviceShadowHandler.shadowUpdate(json.dumps(payload), customShadowCallback_Update, 5)
+        time.sleep(1)
