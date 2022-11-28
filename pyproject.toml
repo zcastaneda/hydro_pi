@@ -9,10 +9,10 @@ readme = "README.md"
 python = "^3.9.1"
 rpi-gpio = "^0.7.1"
 logging = "^0.4.9.6"
-board = "^1.0"
 adafruit-seesaw = "^1.0"
 awsiotpythonsdk = "^1.5.2"
 adafruit-circuitpython-dht = "^3.7.8"
+adafruit-blinka = "^8.7.0"
 
 
 [build-system]

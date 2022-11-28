@@ -117,14 +117,6 @@ optional = false
 python-versions = "*"
 
 [[package]]
-name = "board"
-version = "1.0"
-description = "Standard Board mechanism for Dojo tasks"
-category = "main"
-optional = false
-python-versions = "*"
-
-[[package]]
 name = "logging"
 version = "0.4.9.6"
 description = "A logging module for Python"
@@ -190,7 +182,7 @@ python-versions = ">=3.7"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9.1"
-content-hash = "d7c73b0697359f378572f8f84e2aa2b696e71967942ec2cc2989efd45db599ed"
+content-hash = "e2c7f8ff9a10bd6e2048c6bd32397eae67d9a54e78b77bbb440a619ed94171d1"
 
 [metadata.files]
 adafruit-bitfield = [
@@ -231,10 +223,6 @@ adafruit-seesaw = [
 awsiotpythonsdk = [
     {file = "AWSIoTPythonSDK-1.5.2-py2.py3-none-any.whl", hash = "sha256:74b6f35d020f3be7956563dae651aa5f178f070609c9623edd12efae583c14f6"},
     {file = "AWSIoTPythonSDK-1.5.2.tar.gz", hash = "sha256:59f20cb5b4ebe902ce21552b9005a0ef0796bba098327268bc8c9e015f23bd6d"},
-]
-board = [
-    {file = "board-1.0-py2.py3-none-any.whl", hash = "sha256:b97c986d0190a2a5181a7fe28959cd8515520b87f672796e21e1b0d32cc63e2f"},
-    {file = "board-1.0.tar.gz", hash = "sha256:cd718c3322a126d86455e24ae0cebb59a567cbdbaf03696391dccf88c8f456d6"},
 ]
 logging = [
     {file = "logging-0.4.9.6.tar.gz", hash = "sha256:26f6b50773f085042d301085bd1bf5d9f3735704db9f37c1ce6d8b85c38f2417"},

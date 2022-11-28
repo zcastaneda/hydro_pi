@@ -1,5 +1,5 @@
 
-from adafruit_seesaw.seesaw import Seesaw
+# from adafruit_seesaw.seesaw import Seesaw
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTShadowClient
 # from board import SCL, SDA
 
@@ -11,6 +11,10 @@ import busio
 import board
 import adafruit_dht
 import RPi
+import sys
+print(sys.path)
+
+print(dir(board))
 
 # Shadow JSON schema:
 #
@@ -111,11 +115,6 @@ if __name__ == "__main__":
 
     dht22_1 = adafruit_dht.DHT22(board.D4)
 
-    temperature_c = dht22_1.temperature
-    temperature_f = temperature_c * (9 / 5) + 32
-    humidity = dht22_1.humidity
-    print(temperature_f, humidity)
-
     # Connect to AWS IoT
     myAWSIoTMQTTShadowClient.connect()
 
@@ -129,20 +128,21 @@ if __name__ == "__main__":
     while True:
 
         # read moisture level through capacitive touch pad
-        # moistureLevel = ss.moisture_read()
-        moistureLevel = 10
+        try:
+            humidity = dht22_1.humidity
 
-        # read temperature from the temperature sensor
-        # temp = ss.get_temp()
-        temp = 123
+            # read temperature from the temperature sensor
+            temperature_f = dht22_1.temperature*(9/5)+32
 
-        # Display moisture and temp readings
-        print("Moisture Level: {}".format(moistureLevel))
-        print("Temperature: {}".format(temp))
-        
-        # Create message payload
-        payload = {"state":{"reported":{"moisture":str(moistureLevel),"temp":str(temp)}}}
+            # Display moisture and temp readings
+            print("Moisture Level: {}".format(humidity))
+            print("Temperature: {}".format(temperature_f))
+            
+            # Create message payload
+            payload = {"state":{"reported":{"moisture":str(humidity),"temp":str(temperature_f)}}}
 
-        # Update shadow
-        deviceShadowHandler.shadowUpdate(json.dumps(payload), customShadowCallback_Update, 5)
+            # Update shadow
+            deviceShadowHandler.shadowUpdate(json.dumps(payload), customShadowCallback_Update, 5)
+        except Exception as e:
+            next
         time.sleep(1)
