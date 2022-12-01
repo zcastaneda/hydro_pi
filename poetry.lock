@@ -44,6 +44,31 @@ python-versions = "*"
 Adafruit-Blinka = "*"
 
 [[package]]
+name = "adafruit-circuitpython-ds18x20"
+version = "1.3.16"
+description = "CircuitPython driver for Dallas 1-Wire temperature sensor."
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+Adafruit-Blinka = "*"
+adafruit-circuitpython-onewire = "*"
+typing-extensions = ">=4.0,<5.0"
+
+[[package]]
+name = "adafruit-circuitpython-onewire"
+version = "2.0.3"
+description = "CircuitPython OneWire helper library for 1-wire bus devices."
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+Adafruit-Blinka = "*"
+adafruit-circuitpython-busdevice = "*"
+
+[[package]]
 name = "adafruit-circuitpython-requests"
 version = "1.12.11"
 description = "A requests-like library for web interfacing"
@@ -182,7 +207,7 @@ python-versions = ">=3.7"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9.1"
-content-hash = "e2c7f8ff9a10bd6e2048c6bd32397eae67d9a54e78b77bbb440a619ed94171d1"
+content-hash = "740f7c89a387e5a02d745f0b97349ed0dd9b4d9e7a5bfa2e913f9c3d599fe82e"
 
 [metadata.files]
 adafruit-bitfield = [
@@ -199,6 +224,14 @@ adafruit-circuitpython-busdevice = [
 adafruit-circuitpython-dht = [
     {file = "adafruit-circuitpython-dht-3.7.8.tar.gz", hash = "sha256:52320eae89494979fe3ca37903657dc59c55c95720b77e93c707c049db7ccf04"},
     {file = "adafruit_circuitpython_dht-3.7.8-py3-none-any.whl", hash = "sha256:b4a4089d6b6453584a123af8e6aa44be5e04b83a8437a582707ef8ff8461abfb"},
+]
+adafruit-circuitpython-ds18x20 = [
+    {file = "adafruit-circuitpython-ds18x20-1.3.16.tar.gz", hash = "sha256:3f771e58c2889036fdc3bd8c7389fb433eb3c8d17112f2a5376f62fab806a955"},
+    {file = "adafruit_circuitpython_ds18x20-1.3.16-py3-none-any.whl", hash = "sha256:cb1a4d55582e026000914334bf0f22db01f52811e16a50a6a14bea28a3ef53fd"},
+]
+adafruit-circuitpython-onewire = [
+    {file = "adafruit-circuitpython-onewire-2.0.3.tar.gz", hash = "sha256:4dda48e176eec675c22a67ad252afc4cee18c142676451557abb933291747873"},
+    {file = "adafruit_circuitpython_onewire-2.0.3-py3-none-any.whl", hash = "sha256:9d1f90a164292f6310ecc8d21177646644ccabe5c4580e57caef8b2bedf7101a"},
 ]
 adafruit-circuitpython-requests = [
     {file = "adafruit-circuitpython-requests-1.12.11.tar.gz", hash = "sha256:48b69b11103ac9786d76dcc102085286b287d8879aaaaccaf4bec76bd3ca909d"},
