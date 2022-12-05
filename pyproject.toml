@@ -17,6 +17,9 @@ adafruit-circuitpython-onewire = "^2.0.3"
 adafruit-circuitpython-ds18x20 = "^1.3.16"
 
 
+[tool.poetry.group.dev.dependencies]
+black = {version = "^22.10.0", allow-prereleases = true}
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

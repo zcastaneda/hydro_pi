@@ -12,9 +12,9 @@ import board
 import adafruit_dht
 import RPi
 import sys
-print(sys.path)
+import subprocess
+from aws_iot import ds18b20
 
-print(dir(board))
 
 # Shadow JSON schema:
 #
@@ -39,7 +39,8 @@ def customShadowCallback_Update(payload, responseStatus, token):
         print("~~~~~~~~~~~~~~~~~~~~~~~")
         print("Update request with token: " + token + " accepted!")
         print("moisture: " + str(payloadDict["state"]["reported"]["moisture"]))
-        print("temperature: " + str(payloadDict["state"]["reported"]["temp"]))
+        print("air_temperature: " + str(payloadDict["state"]["reported"]["air_temp"]))
+        print("water_temperature: " + str(payloadDict["state"]["reported"]["water_temp"]))
         print("~~~~~~~~~~~~~~~~~~~~~~~\n\n")
 
     if responseStatus == "rejected":
@@ -113,36 +114,75 @@ if __name__ == "__main__":
     myAWSIoTMQTTShadowClient.configureConnectDisconnectTimeout(10) # 10 sec
     myAWSIoTMQTTShadowClient.configureMQTTOperationTimeout(5) # 5 sec
 
+    #initialize sensors
+    print('setting up devices')
+    bash_cmd = f'chmod 777 /dev/mem'
+    process = subprocess.Popen(bash_cmd.split(), stdout=subprocess.PIPE)
+    output, error = process.communicate()
+    bash_cmd = f'chmod 777 /dev/gpiomem'
+    process = subprocess.Popen(bash_cmd.split(), stdout=subprocess.PIPE)
+    output, error = process.communicate()
+    
+
     dht22_1 = adafruit_dht.DHT22(board.D4)
+    water_temp1 = ds18b20.pyds18b20()
+    print(f'current devices: {water_temp1.device_list}')
+
 
     # Connect to AWS IoT
+    print('connecting to AWS')
     myAWSIoTMQTTShadowClient.connect()
+    print('connected to AWS')
 
     # Create a device shadow handler, use this to update and delete shadow document
+    print('creating shadow handler')
     deviceShadowHandler = myAWSIoTMQTTShadowClient.createShadowHandlerWithName(args.thingName, True)
+    print('created shadow handler')
 
     # Delete current shadow JSON doc
-    deviceShadowHandler.shadowDelete(customShadowCallback_Delete, 5)
+    print('deleting current shadow JSON doc')
+    deviceShadowHandler.shadowDelete(customShadowCallback_Delete, 15)
 
+    print('deleted current shadow JSON doc')
     # Read data from moisture sensor and update shadow
     while True:
+        print('while loop')
 
-        # read moisture level through capacitive touch pad
+        reading_dht22 = True
+        reading_temp=True
+        reading_humidity=True
+
+        while reading_dht22:
+            try:
+                if reading_humidity:
+                    humidity = dht22_1.humidity
+                    reading_humidity=False
+
+                if reading_temp:
+                    # read temperature from the temperature sensor
+                    temperature_f = round(dht22_1.temperature*(9/5)+32,3)
+                    reading_temp=False
+                reading_dht22=False
+            except Exception as e:
+                print(f'{e}. Retrying dht22')
         try:
-            humidity = dht22_1.humidity
 
-            # read temperature from the temperature sensor
-            temperature_f = dht22_1.temperature*(9/5)+32
+
+            # get water temp from ds18b20
+            water_temp_f = round(water_temp1.get_temp(sensor_name = water_temp1.device_list[0]),3)
 
             # Display moisture and temp readings
             print("Moisture Level: {}".format(humidity))
             print("Temperature: {}".format(temperature_f))
+            print("Water temperature: {}".format(water_temp_f))
+
             
             # Create message payload
-            payload = {"state":{"reported":{"moisture":str(humidity),"temp":str(temperature_f)}}}
+            payload = {"state":{"reported":{"moisture":str(humidity),"air_temp":str(temperature_f),"water_temp":str(water_temp_f)}}}
 
             # Update shadow
             deviceShadowHandler.shadowUpdate(json.dumps(payload), customShadowCallback_Update, 5)
         except Exception as e:
+            print(e)
             next
-        time.sleep(1)
+        time.sleep(10)
